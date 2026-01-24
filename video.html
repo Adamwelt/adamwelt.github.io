@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponor Hub - Watching</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ph-orange: #ffa31a;
+            --ph-black: #1b1b1b;
+            --ph-dark-grey: #282828;
+            --ph-light-grey: #a0a0a0;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .hub-logo {
+            background-color: var(--ph-orange);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .nav-link:hover { color: var(--ph-orange); }
+
+        #sidebar-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        #sidebar-container::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="bg-[#1b1b1b] border-b border-[#333] sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <a href="index.html" class="text-2xl font-black flex items-center tracking-tighter">
+                <span>Ponor</span><span class="hub-logo ml-1">Hub</span>
+            </a>
+            <nav class="hidden md:flex gap-6 text-sm font-bold">
+                <a href="index.html" class="nav-link">HOME</a>
+                <a href="#" class="nav-link text-[#ffa31a]">VIDEOS</a>
+                <a href="#" class="nav-link">CATEGORIES</a>
+                <a href="live.html" class="nav-link">LIVE</a>
+                <a href="stars.html" class="nav-link">STARS</a>
+            </nav>
+        </div>
+        <div class="flex-1 max-w-md mx-8 hidden sm:block">
+            <div class="relative">
+                <input type="text" placeholder="Search videos..." class="w-full bg-[#000] border border-[#444] rounded-full py-1.5 px-4 text-sm focus:outline-none focus:border-[#ffa31a]">
+                <button class="absolute right-3 top-1.5 text-gray-500">🔍</button>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 text-sm font-bold">
+            <button class="hover:text-[#ffa31a]">Log In</button>
+            <button class="bg-[#ffa31a] text-black px-4 py-1.5 rounded font-black">SIGN UP</button>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex flex-col lg:flex-row gap-6">
+        <div class="flex-1">
+            <div class="aspect-video bg-black rounded-sm overflow-hidden border border-[#333]">
+                <video id="main-player" controls autoplay class="w-full h-full">
+                    <source id="video-source" src="" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="mt-4">
+                <h1 id="video-title" class="text-2xl font-bold tracking-tight">Loading...</h1>
+                <div class="flex justify-between items-center mt-3 border-b border-[#333] pb-6">
+                    <div class="text-sm text-gray-500 font-bold uppercase">
+                        <span id="view-count" class="text-gray-400"></span> Views • Jan 4, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-96">
+            <div class="flex items-center justify-between mb-4 border-b border-[#333] pb-2">
+                <h3 class="font-bold text-sm text-gray-400 uppercase">Up Next</h3>
+            </div>
+            <div id="sidebar-container" class="flex flex-col gap-3"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const videoTitles = [
+        "Biggest Ponor in the World", "Wet Ponor After Heavy Flow",
+        "Deepest Ponor Ever Recorded", "Unexplored Ponor Discovered at Night",
+        "Ponor used by many people", "Overflowing Ponor Causes Structural Damage",
+        "Tight Entrance, Endless Ponor Below", "Scientists Amazed by This Open Ponor"
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = parseInt(urlParams.get('id')) || 1;
+
+    // Load Main Video from 'videos' folder
+    const player = document.getElementById('main-player');
+    const source = document.getElementById('video-source');
+    source.src = `videos/${videoId}.mp4`;
+    player.load();
+
+    document.getElementById('video-title').innerText = videoTitles[videoId - 1] || "Amazing Ponor Video";
+    document.getElementById('view-count').innerText = (Math.floor(Math.random() * 800) + 100) + ",402";
+
+    // Build Sidebar
+    const sidebar = document.getElementById('sidebar-container');
+    function formatDur(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ":" + (s < 10 ? '0' : '') + s;
+    }
+
+    for (let i = 1; i <= 8; i++) {
+        if (i === videoId) continue;
+        
+        const card = document.createElement('a');
+        card.href = `video.html?id=${i}`;
+        card.className = "flex gap-3 group";
+        card.innerHTML = `
+            <div class="w-40 aspect-video bg-zinc-900 rounded-sm overflow-hidden flex-shrink-0 relative">
+                <img src="pictures/${i}.jpg" class="object-cover w-full h-full group-hover:scale-110 transition-transform">
+                <span id="side-dur-${i}" class="absolute bottom-1 right-1 bg-black/80 text-[10px] px-1 rounded">--:--</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-sm font-bold line-clamp-2 group-hover:text-[#ffa31a] leading-tight">${videoTitles[i-1]}</span>
+            </div>
+        `;
+        sidebar.appendChild(card);
+
+        // Get Metadata from 'videos' folder
+        const v = document.createElement('video');
+        v.src = `videos/${i}.mp4`;
+        v.onloadedmetadata = () => {
+            document.getElementById(`side-dur-${i}`).innerText = formatDur(v.duration);
+        };
+    }
+</script>
+</body>
+</html>

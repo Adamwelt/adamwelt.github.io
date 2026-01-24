@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponor Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ph-orange: #ffa31a;
+            --ph-black: #1b1b1b;
+            --ph-dark-grey: #282828;
+            --ph-light-grey: #a0a0a0;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #age-verification-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .hub-logo {
+            background-color: var(--ph-orange);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .img-container {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate; 
+            transform: translateZ(0);
+        }
+
+        .video-card img {
+            will-change: transform;
+            pointer-events: none; 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backface-visibility: hidden;
+        }
+
+        .video-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .duration-tag {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 4px;
+            font-size: 11px;
+            border-radius: 2px;
+            z-index: 20;
+        }
+
+        .nav-link:hover { color: var(--ph-orange); }
+
+        .category-pill {
+            background: var(--ph-dark-grey);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .play-overlay::after {
+            content: "▶";
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 3rem;
+        }
+
+        .video-card:hover .play-overlay { opacity: 1; }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+<div id="age-verification-overlay">
+    <div class="bg-[#1b1b1b] p-10 rounded-xl border border-[#333] max-w-lg w-full text-center shadow-2xl mx-4">
+        <div class="text-4xl font-black mb-8 flex justify-center tracking-tighter">
+            <span>Ponor</span><span class="hub-logo ml-2 text-2xl">Hub</span>
+        </div>
+        <h2 class="text-2xl font-bold mb-4 uppercase tracking-tight">Are you 18 or older?</h2>
+        <p class="text-gray-400 mb-10 text-sm leading-relaxed">
+            By entering, you confirm you are at least 18 years of age. This website contains geological content that may be too deep for some viewers.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="verify-button" class="bg-[#ffa31a] text-black font-black py-4 px-8 rounded hover:bg-orange-400 transition-colors uppercase w-full">
+                I am 18 or older - Enter
+            </button>
+            <button onclick="window.location.href='https://www.google.com'" class="bg-[#282828] text-white font-bold py-4 px-8 rounded hover:bg-[#333] transition-colors w-full">
+                Exit
+            </button>
+        </div>
+    </div>
+</div>
+
+<header class="bg-[#1b1b1b] border-b border-[#333] sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <div class="text-2xl font-black flex items-center tracking-tighter">
+                <span>Ponor</span><span class="hub-logo ml-1">Hub</span>
+            </div>
+            <nav class="hidden md:flex gap-6 text-sm font-bold">
+                <a href="index.html" class="nav-link text-[#ffa31a]">HOME</a>
+                <a href="#" class="nav-link">VIDEOS</a>
+                <a href="#" class="nav-link">CATEGORIES</a>
+                <a href="live.html" class="nav-link">LIVE</a>
+                <a href="stars.html" class="nav-link">STARS</a>
+            </nav>
+        </div>
+        <div class="flex-1 max-w-md mx-8 hidden sm:block">
+            <div class="relative">
+                <input type="text" placeholder="Search videos..." class="w-full bg-[#000] border border-[#444] rounded-full py-1.5 px-4 text-sm focus:outline-none focus:border-[#ffa31a]">
+                <button class="absolute right-3 top-1.5 text-gray-500">🔍</button>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 text-sm font-bold">
+            <button class="hover:text-[#ffa31a]">Log In</button>
+            <button class="bg-[#ffa31a] text-black px-4 py-1.5 rounded font-black">SIGN UP</button>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6 border-b border-[#333] pb-2">
+        <h2 class="text-xl font-bold flex items-center gap-2">Recommended Videos</h2>
+    </div>
+
+    <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        </div>
+
+    <div class="mt-12">
+        <h2 class="text-xl font-bold mb-6 border-b border-[#333] pb-2">Popular Categories</h2>
+        <div class="flex flex-wrap gap-3">
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Wet Ponors</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Deep Dives</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Overflow Zone</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Swallow Spots</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Secret Passages</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Underground Adventures</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Night Explorations</span>
+            <span class="category-pill hover:bg-[#444] cursor-pointer">Tight Entrances</span>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-[#1b1b1b] mt-20 border-t border-[#333] py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-left">
+            <div>
+                <h4 class="font-bold mb-4 text-[#ffa31a]">Information</h4>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li><a href="#" class="hover:underline">Terms of Service</a></li>
+                    <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:underline">DMCA Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-[#ffa31a]">Support</h4>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li><a href="#" class="hover:underline">Help Center</a></li>
+                    <li><a href="#" class="hover:underline">Community Guidelines</a></li>
+                    <li><a href="#" class="hover:underline">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-[#333] pt-8 text-center text-xs text-gray-600">
+            &copy; 2026 PonorHub
+        </div>
+    </div>
+</footer>
+
+<script>
+    const videoTitles = [
+        "Biggest Ponor in the World",
+        "Wet Ponor After Heavy Flow",
+        "Deepest Ponor Ever Recorded",
+        "Unexplored Ponor Discovered at Night",
+        "Ponor used by many people",
+        "Overflowing Ponor Causes Structural Damage",
+        "Tight Entrance, Endless Ponor Below",
+        "Scientists Amazed by This Open Ponor"
+    ];
+
+    const grid = document.getElementById('video-grid');
+
+    // Helper to format seconds to MM:SS
+    function formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return mins + ":" + (secs < 10 ? '0' : '') + secs;
+    }
+
+    for (let i = 1; i <= 8; i++) {
+        const card = document.createElement('a');
+        card.href = `video.html?id=${i}`;
+        card.className = "video-card cursor-pointer group";
+        card.innerHTML = `
+            <div class="img-container rounded-md mb-2 aspect-video bg-zinc-900 border-2 border-transparent group-hover:border-[#ffa31a] transition-all">
+                <img src="pictures/${i}.jpg" alt="${videoTitles[i-1]}" class="object-cover w-full h-full" onerror="this.src='https://loremflickr.com/400/225/nature?lock=${i}'">
+                <span id="dur-${i}" class="duration-tag font-bold">--:--</span>
+                <div class="play-overlay"></div>
+            </div>
+            <h3 class="font-bold text-sm line-clamp-2 group-hover:text-[#ffa31a]">${videoTitles[i-1]}</h3>
+            <div class="flex justify-between items-center mt-1 text-[11px] text-gray-500 font-bold uppercase tracking-tighter">
+                <span>${Math.floor(Math.random()*800)+100}K VIEWS</span>
+                <span class="text-gray-500">98%</span>
+            </div>
+        `;
+        grid.appendChild(card);
+
+        // Fetch real duration from videos folder
+        const v = document.createElement('video');
+        v.src = `videos/${i}.mp4`;
+        v.preload = "metadata";
+        v.onloadedmetadata = function() {
+            document.getElementById('dur-' + i).innerText = formatDuration(v.duration);
+        };
+    }
+
+    const overlay = document.getElementById('age-verification-overlay');
+    const verifyBtn = document.getElementById('verify-button');
+
+    if (sessionStorage.getItem('ponor_verified') === 'true') {
+        overlay.style.display = 'none';
+        document.body.classList.remove('overflow-hidden');
+    } else {
+        overlay.style.display = 'flex';
+        document.body.classList.add('overflow-hidden');
+    }
+
+    verifyBtn.addEventListener('click', () => {
+        sessionStorage.setItem('ponor_verified', 'true');
+        overlay.style.display = 'none';
+        document.body.classList.remove('overflow-hidden');
+    });
+</script>
+
+</body>
+</html>

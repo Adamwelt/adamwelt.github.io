@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponor Hub - Top Stars</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ph-orange: #ffa31a;
+            --ph-black: #1b1b1b;
+        }
+        body { 
+            background-color: #000; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; /* Clean, modern font */
+        }
+        .hub-logo { 
+            background-color: var(--ph-orange); 
+            color: #000; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-weight: 900; 
+        }
+        .nav-link:hover { color: var(--ph-orange); }
+        
+        /* Smooth hover effect for your custom images */
+        .star-card img {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .star-card:hover img { transform: scale(1.1); }
+        
+        .rank-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--ph-orange);
+            color: #000;
+            font-weight: 900;
+            padding: 2px 12px;
+            border-radius: 6px;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .text-shadow {
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+
+<header class="bg-[#1b1b1b] border-b border-[#333] sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <a href="index.html" class="text-2xl font-black flex items-center tracking-tighter">
+                <span>Ponor</span><span class="hub-logo ml-1">Hub</span>
+            </a>
+            <nav class="hidden md:flex gap-6 text-sm font-bold uppercase tracking-tight">
+                <a href="index.html" class="nav-link">HOME</a>
+                <a href="index.html" class="nav-link">VIDEOS</a>
+                <a href="#" class="nav-link">CATEGORIES</a>
+                <a href="live.html" class="nav-link">LIVE</a>
+                <a href="stars.html" class="nav-link text-[#ffa31a]">STARS</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-[#333] pb-6 gap-4">
+        <div>
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter leading-none">Top Stars</h1>
+            <p class="text-gray-500 text-sm font-bold mt-2">The internet's most elite underground explorers.</p>
+        </div>
+        <div class="flex bg-[#111] p-1 rounded-lg border border-[#333]">
+            <button class="bg-[#222] text-[#ffa31a] px-6 py-2 rounded-md text-xs font-black uppercase">Trending</button>
+            <button class="px-6 py-2 text-gray-500 text-xs font-black uppercase hover:text-white transition-colors">All Time</button>
+        </div>
+    </div>
+
+    <div id="stars-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+        </div>
+</main>
+
+<script>
+    // These names match your photo names if you save them as 1.png, 2.png, etc.
+    const stars = [
+        { name: "Debbie Deep", views: "14.2M", videos: 142, rank: 1 },
+        { name: "Kyle Cave", views: "12.8M", videos: 89, rank: 2 },
+        { name: "Brenda Basalt", views: "10.5M", videos: 112, rank: 3 },
+        { name: "Sam Siphon", views: "9.1M", videos: 67, rank: 4 },
+        { name: "Grace Grotto", views: "8.4M", videos: 45, rank: 5 },
+        { name: "Leo Limestone", views: "7.2M", videos: 156, rank: 6 },
+        { name: "Mike Muddy", views: "6.8M", videos: 34, rank: 7 },
+        { name: "Val Vortex", views: "5.9M", videos: 92, rank: 8 },
+    ];
+
+    const grid = document.getElementById('stars-grid');
+
+    stars.forEach(star => {
+        const card = document.createElement('div');
+        card.className = "star-card group cursor-pointer";
+        card.innerHTML = `
+            <div class="relative aspect-[2/3] rounded-2xl overflow-hidden mb-4 border-2 border-zinc-800 group-hover:border-[#ffa31a] transition-all duration-300">
+                <div class="rank-badge">#${star.rank}</div>
+                <img src="stars/${star.rank}.jpg" 
+                     alt="${star.name}" 
+                     class="w-full h-full object-cover grayscale group-hover:grayscale-0"
+                     onerror="this.src='https://loremflickr.com/400/600/explorer?lock=${star.rank}'">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                <div class="absolute bottom-5 left-0 right-0 text-center px-2">
+                    <div class="text-xl font-black tracking-tighter uppercase text-shadow">${star.name}</div>
+                    <div class="text-[10px] font-bold text-[#ffa31a] tracking-widest uppercase mt-1">Verified Explorer</div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-[11px] font-black text-white bg-[#1a1a1a] px-3 py-1 rounded-full border border-[#333]">
+                    ${star.views} VIEWS • ${star.videos} VIDEOS
+                </span>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+</script>
+
+</body>
+</html>

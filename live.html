@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponor Hub - LIVE Feed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ph-orange: #ffa31a;
+            --ph-black: #1b1b1b;
+            --ph-dark-grey: #282828;
+            --ph-light-grey: #a0a0a0;
+            --ph-red: #ff0000;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            width: 100vw;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--ph-black);
+            border-bottom: 1px solid #333;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+        }
+
+        .header-container {
+            max-width: 80rem; 
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .hub-logo {
+            background-color: var(--ph-orange);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .nav-link { 
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #fff;
+            transition: color 0.2s;
+            text-transform: uppercase;
+        }
+        .nav-link:hover { color: var(--ph-orange); }
+        .nav-link.active { color: var(--ph-orange); }
+
+        /* --- ENTRY POPUP --- */
+        #entry-popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .enter-btn {
+            background: var(--ph-orange);
+            color: #000;
+            font-weight: bold;
+            padding: 16px 40px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        .enter-btn:hover { background: #fff; transform: scale(1.05); }
+
+        /* --- SHORTS ENGINE --- */
+        .shorts-main {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+        }
+        .shorts-main::-webkit-scrollbar { display: none; }
+
+        .video-section {
+            height: 100vh; 
+            width: 100vw;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        /* --- UI OVERLAY --- */
+        .live-status {
+            position: absolute;
+            top: 88px; 
+            left: 24px;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.7);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 13px;
+            color: #fff;
+            gap: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .blinking-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--ph-red);
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.1); }
+        }
+
+        .video-ui-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 120px 24px 80px;
+            background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .action-column { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 24px; 
+            position: absolute; 
+            right: 24px; 
+            bottom: 100px; 
+            z-index: 50;
+        }
+        
+        .icon-btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60px;
+        }
+
+        .icon-btn { 
+            width: 56px; 
+            height: 56px; 
+            background: rgba(30, 30, 30, 0.8); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+            cursor: pointer; 
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            user-select: none;
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover { background: rgba(255, 163, 26, 0.2); border-color: var(--ph-orange); }
+        .icon-btn.liked { color: var(--ph-orange); border-color: var(--ph-orange); background: rgba(255, 163, 26, 0.15); }
+
+        .pop-trigger { animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes heartPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+
+        .heart-particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 14px;
+            animation: flyUp 0.6s ease-out forwards;
+            z-index: 60;
+        }
+        @keyframes flyUp { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tw-tx), var(--tw-ty)); opacity: 0; } }
+        
+        .stat-label { font-size: 12px; font-weight: 900; margin-top: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+        /* --- CHAT SYSTEM --- */
+        .comment-section {
+            position: fixed; 
+            right: 100px; 
+            top: 84px; 
+            bottom: 40px;
+            width: 380px; 
+            background: #0a0a0a; 
+            border: 1px solid #222;
+            border-radius: 12px; 
+            display: none; 
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+        }
+        .comment-section.open { display: flex; }
+
+        .chat-header { padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .comment-list { flex-grow: 1; overflow-y: auto; font-size: 14px; padding: 20px; scroll-behavior: smooth; }
+        .comment-list::-webkit-scrollbar { width: 4px; }
+        .comment-list::-webkit-scrollbar-thumb { background: #333; }
+        .comment-user { color: var(--ph-orange); font-weight: bold; margin-right: 8px; }
+        
+        .chat-input-area { padding: 15px 20px; border-top: 1px solid #222; display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 10px 14px; color: white; outline: none; transition: border-color 0.2s; }
+        .chat-input-area input:focus { border-color: var(--ph-orange); }
+        .send-btn { background: var(--ph-orange); color: #000; font-weight: bold; padding: 0 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; }
+        .send-btn:hover { opacity: 0.9; }
+
+        .user-msg { border-left: 2px solid var(--ph-orange); padding-left: 10px; background: rgba(255,163,26,0.05); }
+
+        .donation-item { 
+            background: rgba(255, 163, 26, 0.1); 
+            border: 1px solid var(--ph-orange);
+            padding: 12px; 
+            margin-bottom: 12px; 
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+<div id="entry-popup">
+    <div class="text-4xl font-black mb-10 tracking-tighter">PONOR<span class="hub-logo ml-1">HUB</span></div>
+    <div class="enter-btn" onclick="enterStream()">Watch Live Feed</div>
+</div>
+
+<header>
+    <div class="header-container">
+        <div class="text-2xl font-black flex items-center tracking-tighter">
+            <span>Ponor</span><span class="hub-logo ml-1">Hub</span>
+        </div>
+        <nav class="hidden md:flex gap-6 ml-10">
+            <a href="index.html" class="nav-link">HOME</a>
+            <a href="index.html" class="nav-link">VIDEOS</a>
+            <a href="#" class="nav-link">CATEGORIES</a>
+            <a href="live.html" class="nav-link active">LIVE</a>
+            <a href="stars.html" class="nav-link">STARS</a>
+        </nav>
+    </div>
+</header>
+
+<div class="shorts-main" id="main-scroll"></div>
+<div id="chat-container-wrapper"></div>
+
+<script>
+    /** DYNAMIC CONFIGURATION **/
+    const VIDEO_CONFIG = [
+        { 
+            id: "ponor1", 
+            src: "live/1.mp4", 
+            title: "Last minutes Ponor", 
+            author: "@IlovePonors",
+            baseViewers: 15822,
+            baseLikes: 58278,
+            baseComments: 14239,
+            chatName: "COMMENTS"
+        },
+        { 
+            id: "cave2", 
+            src: "live/2.mp4", 
+            title: "Biggets City Ponor", 
+            author: "@UndergroundLegends",
+            baseViewers: 9457,
+            baseLikes: 22139,
+            baseComments: 8965,
+            chatName: "COMMENTS"
+        },
+        { 
+            id: "cave3", 
+            src: "live/3.mp4", 
+            title: "Underwater Cave Systems Revealed", 
+            author: "@HydroHoles",
+            baseViewers: 12400,
+            baseLikes: 35000,
+            baseComments: 11000,
+            chatName: "COMMENTS"
+        }
+    ];
+
+
+    const susComments = [
+        { user: "CaveMan99", text: "This is insane! How deep does it go?" },
+        { user: "GeologyRocks", text: "Watch out for the loose limestone!" },
+        { user: "DiverDan", text: "Best ponor footage I've seen all year." },
+        { user: "FlowState", text: "The water pressure looks intense." },
+        { user: "UndergroundKing", text: "LETS GOOOO!" },
+        { user: "RockHard4U", text: "That entrance is way tighter than it looks on camera." },
+        { user: "DeepExplorer", text: "I’ve been waiting all day to see someone finally go down that hole." },
+        { user: "MoistGravel", text: "The way the water just flows in there... absolutely soaking wet." },
+        { user: "SlipperySlope", text: "I'd love to explore those dark crevices. No gear needed." },
+        { user: "HardRockLover", text: "I love it when the walls are this smooth." },
+        { user: "StalagTight", text: "Look at the size of that formation! 😱" },
+        { user: "TunnelRat", text: "It gets narrower the further you go in." },
+        { user: "DrillBit", text: "Are we going all the way to the bottom tonight?" },
+        { user: "ErosionEnjoyer", text: "The natural curves on that entrance are wild." },
+        { user: "MuddyBuddy", text: "I don't mind getting a little dirty for a view like this." },
+        { user: "PressurePoint", text: "The suction in that drain is terrifyingly good." },
+        { user: "DarkPlaceFan", text: "I prefer it when the lights are off." },
+        { user: "SqueezeMe", text: "I’ve seen tighter gaps than that, trust me." },
+        { user: "GrottoGuy", text: "Is it just me or is it getting steamy in there?" },
+        { user: "DeepDive99", text: "The echo in that chamber must be crazy." },
+        { user: "PillarPusher", text: "Handle that gear with care, it looks expensive." },
+        { user: "LubeMaster_Geo", text: "Needs more water flow to get through that section." },
+        { user: "CaveHog", text: "I’ve been stuck in a hole like that for hours before." },
+        { user: "BasaltBabe", text: "I like my caves deep and unexplored." },
+        { user: "RockBottom", text: "Finally, someone who isn't afraid to go all in." },
+        { user: "ChasmChaser", text: "Is there room for two in there?" },
+        { user: "SiltStirrer", text: "Don't stop now, you're almost at the climax!" },
+        { user: "SpeleoSimp", text: "I'd let this man guide me anywhere." },
+        { user: "WetWallWatcher", text: "The moisture levels are off the charts right now." },
+        { user: "EntryFee", text: "I'd pay just to see the opening again." },
+        { user: "GraniteGazer", text: "So firm. So solid. Amazing." },
+        { user: "DepthPerception", text: "You can tell he’s done this a thousand times." },
+        { user: "TightFitOnly", text: "If you get stuck, I'm coming in after you." },
+        { user: "BoulderHolder", text: "That’s a lot of weight for such a small space." },
+        { user: "CreviceCrawler", text: "Found the sweet spot!" },
+        { user: "HoleInOne", text: "Best entry I've seen on this channel." },
+        { user: "Sub_Terra", text: "It’s so much bigger once you’re actually inside." },
+        { user: "FossilFool", text: "Look at the age on that opening... incredible." },
+        { user: "DripStone", text: "Watching the water drop like that is so satisfying." },
+        { user: "MagmaMike", text: "Things are heating up!" },
+        { user: "SinkholeSam", text: "I just fell for this stream instantly." },
+        { user: "AbyssLooker", text: "The abyss looks back... and it's gorgeous." },
+        { user: "SpelunkJunkie", text: "I need my daily fix of deep cave action." },
+        { user: "RopeBurner", text: "Slide down faster!" },
+        { user: "EchoLocation", text: "I can hear the water splashing from here." },
+        { user: "KarstKing", text: "Only professionals should handle a hole this dangerous." },
+        { user: "VelvetCave", text: "The walls look so soft in this light." },
+        { user: "BigGulp", text: "That ponor is swallowing everything in sight!" },
+        { user: "探検家", text: "Amazing depth from Japan!" },
+        { user: "NoFlashlight", text: "I like to explore by touch alone." }
+    ];
+
+    const susDonations = [
+        { user: "HardRock4U", amount: "$50.00", text: "That entrance is tighter than it looks. 🥵" },
+        { user: "MoistGravel", amount: "$5.00", text: "Love it when the walls get soaking wet." },
+        { user: "SlipperySlope", amount: "$10.00", text: "I'd love to explore those dark crevices." },
+        { user: "DeepExplorer", amount: "$25.00", text: "Waiting all day to see you go down that hole." },
+        { user: "StalagTight", amount: "$69.00", text: "Look at the size of that formation! 😱" },
+        { user: "DrillBit", amount: "$15.00", text: "Are we going all the way to the bottom?" },
+        { user: "MuddyBuddy", amount: "$20.00", text: "I don't mind getting dirty for a view like this." },
+        { user: "SqueezeMe", amount: "$5.00", text: "I’ve seen tighter gaps than that, trust me." },
+        { user: "GrottoGuy", amount: "$30.00", text: "Is it just me or is it getting steamy in there?" },
+        { user: "LubeMaster", amount: "$10.00", text: "Needs more water flow to get through." },
+        { user: "BasaltBabe", amount: "$50.00", text: "I like my caves deep and unexplored." },
+        { user: "ChasmChaser", amount: "$15.00", text: "Is there room for two in there?" },
+        { user: "SiltStirrer", amount: "$20.00", text: "Don't stop now, you're almost at the climax!" },
+        { user: "WetWallWatcher", amount: "$5.00", text: "The moisture levels are off the charts." },
+        { user: "EntryFee", amount: "$100.00", text: "I'd pay just to see the opening again." },
+        { user: "TightFitOnly", amount: "$40.00", text: "If you get stuck, I'm coming in after you." },
+        { user: "CreviceCrawler", amount: "$5.00", text: "You found the sweet spot!" },
+        { user: "HoleInOne", amount: "$25.00", text: "Best entry I've seen on this channel." },
+        { user: "Sub_Terra", amount: "$10.00", text: "It’s so much bigger once you’re inside." },
+        { user: "RopeBurner", amount: "$15.00", text: "Slide down a little faster for me!" },
+        { user: "NoFlashlight", amount: "$5.00", text: "I prefer to explore by touch alone." },
+        { user: "BigGulp", amount: "$20.00", text: "That ponor is swallowing everything." },
+        { user: "VelvetCave", amount: "$50.00", text: "The walls look so soft in this light." },
+        { user: "PressurePoint", amount: "$10.00", text: "The suction in that drain is terrifyingly good." },
+        { user: "RockHard", amount: "$69.00", text: "The natural curves on that entrance are wild." },
+        { user: "TunnelRat", amount: "$5.00", text: "It gets narrower the further you go in." },
+        { user: "DarkPlaceFan", amount: "$15.00", text: "I prefer it when the lights are off." },
+        { user: "PillarPusher", amount: "$20.00", text: "Handle that gear with care, it’s expensive." },
+        { user: "CaveHog", amount: "$5.00", text: "I’ve been stuck in a hole like that for hours." },
+        { user: "RockBottom", amount: "$30.00", text: "Finally, someone not afraid to go all in." },
+        { user: "SpeleoSimp", amount: "$10.00", text: "I'd let you guide me anywhere." },
+        { user: "GraniteGazer", amount: "$50.00", text: "So firm. So solid. Amazing." },
+        { user: "DepthPerception", amount: "$25.00", text: "You can tell you've done this a thousand times." },
+        { user: "BoulderHolder", amount: "$15.00", text: "That’s a lot of weight for a small space." },
+        { user: "FossilFool", amount: "$10.00", text: "Look at the age on that opening... incredible." },
+        { user: "DripStone", amount: "$5.00", text: "Watching the water drop is so satisfying." },
+        { user: "MagmaMike", amount: "$20.00", text: "Things are really heating up!" },
+        { user: "AbyssLooker", amount: "$50.00", text: "The abyss is gorgeous. Go deeper." },
+        { user: "SpelunkJunkie", amount: "$5.00", text: "I need my daily fix of deep cave action." },
+        { user: "KarstKing", amount: "$100.00", text: "Only pros should handle a hole this dangerous." },
+        { user: "ErosionEnjoyer", amount: "$15.00", text: "The way the water carved that out... wow." },
+        { user: "FlowState", amount: "$20.00", text: "I love the way it flows in there." },
+        { user: "UndergroundKing", amount: "$10.00", text: "Take it all the way to the end!" },
+        { user: "GeologyRocks", amount: "$5.00", text: "Watch out, it's getting really loose." },
+        { user: "DiverDan", amount: "$30.00", text: "Deepest dive I've seen all year." },
+        { user: "CaveMan99", amount: "$15.00", text: "How deep can you actually go?" },
+        { user: "ShaftSeeker", amount: "$50.00", text: "That's a very impressive vertical drop." },
+        { user: "PoreSpace", amount: "$10.00", text: "I like it when the fit is this tight." },
+        { user: "BedrockBound", amount: "$25.00", text: "Don't stop until you hit the bottom." },
+        { user: "HiddenGrotto", amount: "$69.00", text: "The best views are always tucked away." }
+    ];
+
+    const APP_STATE = {};
+
+    function initDynamicContent() {
+        const mainScroll = document.getElementById('main-scroll');
+        const chatWrapper = document.getElementById('chat-container-wrapper');
+
+        VIDEO_CONFIG.forEach(video => {
+            APP_STATE[video.id] = {
+                viewers: video.baseViewers,
+                likes: video.baseLikes,
+                comments: video.baseComments,
+                isLiked: false
+            };
+
+            const section = document.createElement('section');
+            section.className = "video-section";
+            section.dataset.streamId = video.id;
+            section.innerHTML = `
+                <div class="live-status"><div class="blinking-dot"></div><span>LIVE</span></div>
+                <div class="video-container"><video loop playsinline src="${video.src}"></video></div>
+                <div class="video-ui-overlay">
+                    <h2 class="font-bold text-3xl">${video.title}</h2>
+                    <p class="text-lg text-gray-400 mt-2 font-medium">${video.author} • <span class="v-count-${video.id}">${video.baseViewers.toLocaleString()}</span> watching</p>
+                </div>
+                <div class="action-column">
+                    <div class="icon-btn-container">
+                        <div class="icon-btn" onclick="handleLike('${video.id}', this)">👍</div>
+                        <span class="stat-label l-count-${video.id}">${(video.baseLikes/1000).toFixed(1)}K</span>
+                    </div>
+                    <div class="icon-btn-container">
+                        <div class="icon-btn" onclick="toggleChat('${video.id}')">💬</div>
+                        <span class="stat-label c-count-${video.id}">${(video.baseComments/1000).toFixed(1)}K</span>
+                    </div>
+                    <div class="icon-btn-container">
+                        <div class="icon-btn" onclick="handleShare(this)">↗️</div>
+                        <span class="stat-label share-text">SHARE</span>
+                    </div>
+                </div>
+            `;
+            mainScroll.appendChild(section);
+
+            const chatPanel = document.createElement('div');
+            chatPanel.id = `chat-${video.id}`;
+            chatPanel.className = "comment-section";
+            chatPanel.innerHTML = `
+                <div class="chat-header">
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-sm tracking-widest">${video.chatName}</span>
+                        <span class="bg-[#222] text-[#888] text-[10px] px-2 py-0.5 rounded-full internal-count-${video.id}">${video.baseComments.toLocaleString()}</span>
+                    </div>
+                    <button onclick="closeAllChats()" class="text-gray-500 hover:text-white">✕</button>
+                </div>
+                <div class="comment-list chat-box" id="box-${video.id}"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="input-${video.id}" placeholder="Chat live..." onkeydown="if(event.key==='Enter') postUserComment('${video.id}')">
+                    <button class="send-btn" onclick="postUserComment('${video.id}')">SEND</button>
+                </div>
+            `;
+            chatWrapper.appendChild(chatPanel);
+
+            // Pre-fill history
+            for(let i=0; i<25; i++) spawnMessage(video.id, true);
+            
+            // "Spam" loop
+            const spamLoop = () => {
+                const burst = Math.floor(Math.random() * 3) + 1;
+                for(let i=0; i<burst; i++) spawnMessage(video.id);
+                setTimeout(spamLoop, 350 + Math.random() * 850);
+            };
+            spamLoop();
+        });
+
+        setupObserver();
+    }
+
+    function spawnMessage(streamId, isHistory = false) {
+        const state = APP_STATE[streamId];
+        if(!isHistory) state.comments++;
+
+        const extCounter = document.querySelector(`.c-count-${streamId}`);
+        if(extCounter) extCounter.innerText = (state.comments/1000).toFixed(1) + 'K';
+        const intCounter = document.querySelector(`.internal-count-${streamId}`);
+        if(intCounter) intCounter.innerText = state.comments.toLocaleString();
+
+        const box = document.getElementById(`box-${streamId}`);
+        if(!box) return;
+
+        const div = document.createElement('div');
+        const isDonation = Math.random() < 0.10; // Slightly higher chance for spam feel
+
+        if (isDonation) {
+            const don = susDonations[Math.floor(Math.random() * susDonations.length)];
+            div.className = "donation-item";
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span class="comment-user">💰 ${don.user}</span>
+                    <span class="text-xs font-black text-[#ffa31a]">${don.amount}</span>
+                </div>
+                <p class="text-xs italic opacity-90">"${don.text}"</p>
+            `;
+        } else {
+            const msgObj = susComments[Math.floor(Math.random() * susComments.length)];
+            div.className = "mb-3 flex items-start text-sm";
+            div.innerHTML = `<span class="comment-user">${msgObj.user}:</span><span class="opacity-90">${msgObj.text}</span>`;
+        }
+
+        box.appendChild(div);
+        if(!isHistory) box.scrollTop = box.scrollHeight;
+        if(box.children.length > 100) box.removeChild(box.firstChild);
+    }
+
+    function postUserComment(streamId) {
+        const input = document.getElementById(`input-${streamId}`);
+        const msg = input.value.trim();
+        if(!msg) return;
+
+        input.value = '';
+        const state = APP_STATE[streamId];
+        state.comments++;
+
+        const box = document.getElementById(`box-${streamId}`);
+        const div = document.createElement('div');
+        div.className = "mb-3 flex items-start text-sm user-msg p-2 rounded";
+        div.innerHTML = `<span class="comment-user" style="color:var(--ph-orange)">YOU:</span><span class="opacity-95 text-white">${msg}</span>`;
+        
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+
+        const extCounter = document.querySelector(`.c-count-${streamId}`);
+        if(extCounter) extCounter.innerText = (state.comments/1000).toFixed(1) + 'K';
+    }
+
+    function handleLike(streamId, btn) {
+        const state = APP_STATE[streamId];
+        state.isLiked = !state.isLiked;
+        btn.classList.toggle('liked', state.isLiked);
+        btn.classList.remove('pop-trigger');
+        void btn.offsetWidth;
+        btn.classList.add('pop-trigger');
+
+        state.likes += (state.isLiked ? 1 : -1);
+        const lCount = document.querySelector(`.l-count-${streamId}`);
+        lCount.innerText = (state.likes/1000).toFixed(1) + "K";
+
+        if(state.isLiked) {
+            for(let i=0; i<6; i++) {
+                const p = document.createElement('span');
+                p.innerText = '🧡';
+                p.className = 'heart-particle';
+                p.style.setProperty('--tw-tx', (Math.random() * 80 - 40) + 'px');
+                p.style.setProperty('--tw-ty', (Math.random() * -80 - 20) + 'px');
+                btn.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+    }
+
+    function toggleChat(streamId) {
+        const panel = document.getElementById(`chat-${streamId}`);
+        const isOpen = panel.classList.contains('open');
+        closeAllChats();
+        if(!isOpen) panel.classList.add('open');
+    }
+
+    function closeAllChats() {
+        document.querySelectorAll('.comment-section').forEach(c => c.classList.remove('open'));
+    }
+
+    function setupObserver() {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target.querySelector('video');
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('video').forEach(v => { if(v !== video) v.pause(); });
+                    video.muted = false;
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            });
+        }, { threshold: 0.7 });
+
+        document.querySelectorAll('.video-section').forEach(s => obs.observe(s));
+    }
+
+    function handleShare(btn) {
+        const text = btn.parentElement.querySelector('.share-text');
+        const dummy = document.createElement('textarea');
+        document.body.appendChild(dummy);
+        dummy.value = window.location.href;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        text.innerText = "COPIED!";
+        setTimeout(() => text.innerText = "SHARE", 2000);
+    }
+
+    function enterStream() {
+        document.getElementById('entry-popup').style.display = 'none';
+        const v = document.querySelector('video');
+        if(v) {
+            v.muted = false;
+            v.play().catch(() => {});
+        }
+    }
+
+    setInterval(() => {
+        VIDEO_CONFIG.forEach(v => {
+            const state = APP_STATE[v.id];
+            const swing = Math.floor(Math.random() * 150) - 70; // Even bigger viewer swings
+            state.viewers = Math.max(500, state.viewers + swing);
+            const el = document.querySelector(`.v-count-${v.id}`);
+            if(el) el.innerText = state.viewers.toLocaleString();
+        });
+    }, 600); // Faster viewer refresh
+
+    window.onload = initDynamicContent;
+</script>
+</body>
+</html>

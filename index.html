@@ -107,23 +107,36 @@
         <div class="text-4xl font-black mb-8 flex justify-center tracking-tighter">
             <span>Ponor</span><span class="hub-logo ml-2 text-2xl">Hub</span>
         </div>
-        <h2 class="text-2xl font-bold mb-4 uppercase tracking-tight">Are you 18 or older?</h2>
-        <p class="text-gray-400 mb-10 text-sm leading-relaxed">
-            By entering, you confirm you are at least 18 years of age.<br>
-            This website contains geological content that may be too deep for some viewers.<br>
-            For clarification: “Ponor” means sinkhole.<br>
+    <h2 class="text-2xl font-black mb-4 uppercase tracking-tight text-white">
+        Are you 18 or older?
+    </h2>
+
+    <p class="text-gray-400 mb-8 text-sm leading-relaxed">
+        By entering, you confirm you are at least 18 years of age and agree to the
+        <a href="terms.html" class="text-[#ffa31a] font-bold hover:underline">
+            Terms of Service
+        </a>.<br>
+
+        This website contains geological content that may be too deep for some viewers.<br>
+
+        <span class="opacity-80">
+            For clarification: “Ponor” means sinkhole.
+        </span><br>
+
+        <span class="italic opacity-60">
             This website is currently under development.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button id="verify-button" class="bg-[#ffa31a] text-black font-black py-4 px-8 rounded hover:bg-orange-400 transition-colors uppercase w-full">
-                I am 18 or older - Enter
-            </button>
-            <button onclick="window.location.href='https://www.google.com'" class="bg-[#282828] text-white font-bold py-4 px-8 rounded hover:bg-[#333] transition-colors w-full">
-                Exit
-            </button>
+        </span>
+    </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="verify-button" class="bg-[#ffa31a] text-black font-black py-4 px-8 rounded hover:bg-orange-400 transition-colors uppercase w-full">
+                    I am 18 or older - Enter
+                </button>
+                <button onclick="window.location.href='https://www.google.com'" class="bg-[#282828] text-white font-bold py-4 px-8 rounded hover:bg-[#333] transition-colors w-full">
+                    Exit
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
 <header class="bg-[#1b1b1b] border-b border-[#333] sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -181,7 +194,7 @@
             <div>
                 <h4 class="font-bold mb-4 text-[#ffa31a]">Information</h4>
                 <ul class="text-sm text-gray-500 space-y-2">
-                    <li><a href="#" class="hover:underline">Terms of Service</a></li>
+                    <li><a href="terms.html" class="hover:underline">Terms of Service</a></li>
                     <li><a href="#" class="hover:underline">Privacy Policy</a></li>
                     <li><a href="#" class="hover:underline">DMCA Policy</a></li>
                 </ul>

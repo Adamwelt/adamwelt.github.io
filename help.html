@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponor Hub - Help Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --ph-orange: #ffa31a;
+            --ph-black: #1b1b1b;
+            --ph-dark-grey: #282828;
+        }
+
+        body {
+            background-color: #000;
+            color: #cfcfcf;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.7;
+        }
+
+        .hub-logo {
+            background-color: var(--ph-orange);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--ph-orange);
+        }
+
+        .content-section {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 14px;
+            padding: 48px;
+        }
+
+        h1, h2 {
+            color: #fff;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-top: 3rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            letter-spacing: 0.04em;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 26px;
+            background: var(--ph-orange);
+            border-radius: 2px;
+        }
+
+        ul {
+            margin-left: 1.25rem;
+        }
+
+        ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            margin-top: 0.75rem;
+        }
+
+        /* Make “If you still need assistance…” not bold */
+        .still-help p {
+            font-weight: normal;
+        }
+        
+        .problem-solution p {
+        margin: 0.5rem 0; /* spacing between Problem and Solution */
+        }
+
+        
+    </style>
+</head>
+<body>
+
+<header class="bg-[#1b1b1b] border-b border-[#333] sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <a href="index.html" class="text-2xl font-black flex items-center tracking-tighter">
+                <span>Ponor</span><span class="hub-logo ml-1">Hub</span>
+            </a>
+            <nav class="hidden md:flex gap-6 text-sm font-bold">
+                <a href="index.html" class="nav-link">HOME</a>
+                <a href="#" class="nav-link">VIDEOS</a>
+                <a href="#" class="nav-link">CATEGORIES</a>
+                <a href="live.html" class="nav-link">LIVE</a>
+                <a href="stars.html" class="nav-link">STARS</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-20">
+
+    <div class="mb-14">
+        <h1 class="text-6xl font-black tracking-tighter text-white leading-none">
+            Help Center
+        </h1>
+        <p class="text-[#ffa31a] font-black mt-4 uppercase tracking-widest text-lg">
+            Totally Helpfull Support
+        </p>
+    </div>
+
+    <div class="content-section shadow-2xl">
+
+        <h2>Common Issues</h2>
+        <ul class="list-disc list-inside font-bold text-white">
+            <li>Site loading slowly? Try turning your computer off and on. Or sacrifice a cookie.</li>
+            <li>Videos not playing? Maybe the internet is sad. Try poking it gently.</li>
+            <li>Found a bug? Kevin loves pets. Name the bug before reporting.</li>
+            <li>Alien-related content disappeared? This is normal. Happens every Day.</li>
+        </ul>
+
+        <h2>Common Problems & Solutions</h2>
+        
+        <div class="problem-solution mb-4">
+            <p><strong>Problem:</strong> “This site doesn’t make sense.”</p>
+            <p><strong>Solution:</strong> Correct.</p>
+        </div>
+        
+        <div class="problem-solution mb-4">
+            <p><strong>Problem:</strong> “I expected something else.”</p>
+            <p><strong>Solution:</strong> Congratulations, you discovered the joke.</p>
+        </div>
+        
+        <div class="problem-solution mb-4">
+            <p><strong>Problem:</strong> “Nothing works.”</p>
+            <p><strong>Solution:</strong> Try turning it off and on again.</p>
+        </div>
+        
+        <h2>Still Need Help?</h2>
+        <div class="still-help">
+            <p>If you still need assistance after reading this page, you may:</p>
+        </div>
+        <ul class="list-disc list-inside font-bold text-white">
+            <li>Re-read it more carefully</li>
+            <li>Accept your fate</li>
+            <li>Contact support (results may vary)</li>
+        </ul>
+
+        <h2>How to Contact Support</h2>
+        <ul class="list-disc list-inside font-bold text-white">
+            <li>Email Kevin at <em>example@gmail.com</em></li>
+            <li>Carrier pigeons (optional but dramatic)</li>
+            <li>Smoke signals (windy days only)</li>
+        </ul>
+
+        <h2>Our Promises</h2>
+        <ul class="list-disc list-inside font-bold text-white">
+            <li>We will try to help you, unless Kevin is asleep.</li>
+            <li>Sometimes solutions are temporary, sometimes magical.</li>
+            <li>We will try to read all Emails</li>
+        </ul>
+
+        <h2>Disclaimer</h2>
+        <p>
+            Help Center is a parody. Use it at your own risk. Kevin is not responsible for lost emails, broken dreams, or menthal sickness.
+        </p>
+
+    </div>
+
+</main>
+
+<footer class="bg-[#1b1b1b] mt-24 border-t border-[#333] py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-10 text-left">
+            <div>
+                <h4 class="font-bold mb-4 text-[#ffa31a]">Information</h4>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li><a href="terms.html" class="hover:underline">Terms of Service</a></li>
+                    <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:underline">DMCA Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-[#ffa31a]">Support</h4>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li><a href="#" class="hover:underline">Help Center</a></li>
+                    <li><a href="#" class="hover:underline">Community Guidelines</a></li>
+                    <li><a href="#" class="hover:underline">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-[#333] pt-8 text-center text-xs text-gray-600">
+            &copy; 2026 PonorHub
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

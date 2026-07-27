@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecKnowledge — Cybersecurity Techniques Reference</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --bg-raised:#151b23;
+    --ink:#e6edf3;
+    --ink-muted:#8b949e;
+    --line:#232b36;
+    --signal:#ffb454;
+    --signal-dim:#7a5a2c;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .mono{
+    font-family:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  ::selection{background:var(--signal-dim);color:var(--ink);}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:40;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    height:54px;
+    padding:0 16px;
+    background:rgba(13,17,23,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+
+  .menu-btn{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:4px;
+    width:38px;
+    height:38px;
+    border:1px solid var(--line);
+    background:var(--bg-raised);
+    cursor:pointer;
+    border-radius:6px;
+    flex-shrink:0;
+  }
+  .menu-btn:hover{border-color:var(--signal-dim);}
+  .menu-btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .menu-btn span{
+    display:block;
+    width:16px;
+    height:2px;
+    background:var(--ink-muted);
+    margin:0 auto;
+    transition:transform .2s ease, opacity .2s ease, background .2s ease;
+  }
+  .menu-btn[aria-expanded="true"] span{background:var(--signal);}
+  .menu-btn[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+  .menu-btn[aria-expanded="true"] span:nth-child(2){opacity:0;}
+  .menu-btn[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+
+  .brand{
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:.02em;
+  }
+  .brand .prompt{color:var(--signal);}
+  .brand .cursor{
+    display:inline-block;
+    width:7px;height:14px;
+    background:var(--signal);
+    margin-left:2px;
+    vertical-align:-2px;
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- Drawer ---------- */
+  .scrim{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:45;
+  }
+  .scrim.open{opacity:1;pointer-events:auto;}
+
+  .drawer{
+    position:fixed;
+    top:0;
+    left:0;
+    height:100%;
+    width:290px;
+    max-width:84vw;
+    background:var(--bg-raised);
+    border-right:1px solid var(--line);
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:50;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+  }
+  .drawer.open{transform:translateX(0);}
+
+  .drawer-head{
+    display:flex;
+    align-items:center;
+    height:54px;
+    padding:0 18px;
+    border-bottom:1px solid var(--line);
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-muted);
+  }
+
+  .drawer nav{padding:6px 0 16px;}
+
+  .drawer-group{padding:14px 18px 4px;}
+  .drawer-group-label{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--signal);
+    opacity:.85;
+  }
+
+  .drawer a.drawer-link{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 18px;
+    font-size:13.5px;
+    color:var(--ink);
+    border-left:2px solid transparent;
+  }
+  .drawer a.drawer-link:hover{
+    background:rgba(255,180,84,.06);
+    border-left-color:var(--signal);
+  }
+  .drawer a.drawer-link:focus-visible{outline:2px solid var(--signal);outline-offset:-2px;}
+  .drawer a.drawer-link::before{
+    content:"›";
+    color:var(--ink-muted);
+  }
+
+  /* ---------- Hero / terminal block ---------- */
+  .hero{
+    padding:48px 20px 8px;
+    max-width:680px;
+    margin:0 auto;
+  }
+
+  .term{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  .term-dot{width:9px;height:9px;border-radius:50%;background:#3a4453;}
+  .term-body{
+    padding:18px 16px 20px;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--ink-muted);
+  }
+  .term-body .line{white-space:pre-wrap;}
+  .term-body .ok{color:#7ee787;}
+  .term-body .path{color:var(--signal);}
+  .term-body .final-cursor{
+    display:inline-block;width:7px;height:13px;background:var(--signal);
+    vertical-align:-2px;animation:blink 1.1s steps(1) infinite;
+  }
+
+  .hero h1{
+    margin-top:28px;
+    font-size:26px;
+    line-height:1.35;
+    font-weight:600;
+    letter-spacing:-.2px;
+  }
+  .hero p{
+    margin-top:12px;
+    font-size:15px;
+    line-height:1.65;
+    color:var(--ink-muted);
+    max-width:56ch;
+  }
+  .hero .signal-word{color:var(--signal);}
+
+  /* ---------- Stat strip ---------- */
+  .stats{
+    max-width:680px;
+    margin:32px auto 0;
+    padding:0 20px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .stat{
+    background:var(--bg-raised);
+    padding:16px 12px;
+    text-align:center;
+  }
+  .stat .num{
+    font-size:20px;
+    font-weight:700;
+    color:var(--signal);
+  }
+  .stat .label{
+    margin-top:4px;
+    font-size:10.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--ink-muted);
+  }
+
+  /* ---------- How it's organized ---------- */
+  .organized{
+    max-width:680px;
+    margin:56px auto 0;
+    padding:0 20px;
+  }
+  .organized .tag{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--signal);
+  }
+  .organized h2{
+    margin-top:8px;
+    font-size:19px;
+    font-weight:600;
+  }
+  .organized p{
+    margin-top:8px;
+    font-size:14.5px;
+    line-height:1.65;
+    color:var(--ink-muted);
+    max-width:58ch;
+  }
+
+  .org-list{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .org-row{
+    background:var(--bg-raised);
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    padding:14px 16px;
+  }
+  .org-row .idx{
+    font-size:12px;
+    color:var(--ink-muted);
+    flex-shrink:0;
+    width:22px;
+  }
+  .org-row .name{font-size:14px;font-weight:600;}
+  .org-row .desc{font-size:13px;color:var(--ink-muted);}
+
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top:56px;
+    border-top:1px solid var(--line);
+    padding:22px 20px 32px;
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-muted);
+  }
+
+  @media (min-width:720px){
+    .hero h1{font-size:32px;}
+    .stats{grid-template-columns:repeat(3,1fr);}
+  }
+</style>
+</head>
+<body>
+
+  <div class="scrim" id="scrim"></div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head mono">techniques/</div>
+    <nav>
+      <div class="drawer-group">
+        <div class="drawer-group-label mono">Network</div>
+        <a class="drawer-link" href="#">Wi-Fi Hacking</a>
+        <a class="drawer-link" href="#">Man-in-the-Middle</a>
+        <a class="drawer-link" href="#">Packet Sniffing</a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label mono">Web</div>
+        <a class="drawer-link" href="#">SQL Injection</a>
+        <a class="drawer-link" href="#">Cross-Site Scripting</a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label mono">Social Engineering</div>
+        <a class="drawer-link" href="#">Phishing</a>
+        <a class="drawer-link" href="#">Pretexting</a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label mono">System</div>
+        <a class="drawer-link" href="#">Privilege Escalation</a>
+        <a class="drawer-link" href="#">Malware Analysis</a>
+      </div>
+    </nav>
+  </aside>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="brand mono"><span class="prompt">~/</span>secknowledge<span class="cursor"></span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="term mono">
+        <div class="term-bar">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+        </div>
+        <div class="term-body">
+          <div class="line">$ whoami<br><span class="ok">reference for security techniques</span></div>
+          <div class="line" style="margin-top:8px;">$ ls <span class="path">./techniques</span><br>network/  web/  social-engineering/  system/</div>
+          <div class="line" style="margin-top:8px;">$ <span class="final-cursor"></span></div>
+        </div>
+      </div>
+
+      <h1>Cybersecurity techniques, explained <span class="signal-word">plainly</span>.</h1>
+      <p>A static reference covering how common attack and defense techniques actually work — no accounts, no feeds, just the material. Open the menu to browse by category.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><div class="num mono">4</div><div class="label">Categories</div></div>
+      <div class="stat"><div class="num mono">10</div><div class="label">Techniques</div></div>
+      <div class="stat"><div class="num mono">100%</div><div class="label">Static / offline</div></div>
+    </section>
+
+    <section class="organized">
+      <div class="tag mono">[ structure ]</div>
+      <h2>How this reference is organized</h2>
+      <p>Every technique lives under one of four categories, reachable from the menu in the top-left. Each category page lists its techniques; each technique page covers what it is, how it works, and how it's typically detected or defended against.</p>
+
+      <div class="org-list">
+        <div class="org-row">
+          <div class="idx mono">01</div>
+          <div><div class="name">Network</div><div class="desc">Attacks against traffic and infrastructure</div></div>
+        </div>
+        <div class="org-row">
+          <div class="idx mono">02</div>
+          <div><div class="name">Web</div><div class="desc">Attacks against applications and sessions</div></div>
+        </div>
+        <div class="org-row">
+          <div class="idx mono">03</div>
+          <div><div class="name">Social Engineering</div><div class="desc">Attacks against people, not systems</div></div>
+        </div>
+        <div class="org-row">
+          <div class="idx mono">04</div>
+          <div><div class="name">System</div><div class="desc">Attacks after initial access is gained</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mono">SecKnowledge — static reference, no tracking, no accounts.</footer>
+
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const drawer = document.getElementById('drawer');
+    const scrim = document.getElementById('scrim');
+
+    function openDrawer(){
+      drawer.classList.add('open');
+      scrim.classList.add('open');
+      drawer.setAttribute('aria-hidden','false');
+      menuBtn.setAttribute('aria-expanded','true');
+    }
+    function closeDrawer(){
+      drawer.classList.remove('open');
+      scrim.classList.remove('open');
+      drawer.setAttribute('aria-hidden','true');
+      menuBtn.setAttribute('aria-expanded','false');
+    }
+
+    menuBtn.addEventListener('click', () => {
+      drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+    });
+    scrim.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') closeDrawer();
+    });
+  </script>
+
+</body>
+</html>

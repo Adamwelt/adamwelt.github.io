@@ -1,1 +1,0 @@
-# adamwelt.github.io

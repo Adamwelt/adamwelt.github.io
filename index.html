@@ -215,41 +215,10 @@
   }
   .hero .signal-word{color:var(--signal);}
 
-  /* ---------- Stat strip ---------- */
-  .stats{
-    max-width:680px;
-    margin:32px auto 0;
-    padding:0 20px;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:1px;
-    background:var(--line);
-    border:1px solid var(--line);
-    border-radius:10px;
-    overflow:hidden;
-  }
-  .stat{
-    background:var(--bg-raised);
-    padding:16px 12px;
-    text-align:center;
-  }
-  .stat .num{
-    font-size:20px;
-    font-weight:700;
-    color:var(--signal);
-  }
-  .stat .label{
-    margin-top:4px;
-    font-size:10.5px;
-    letter-spacing:.05em;
-    text-transform:uppercase;
-    color:var(--ink-muted);
-  }
-
   /* ---------- How it's organized ---------- */
   .organized{
     max-width:680px;
-    margin:56px auto 0;
+    margin:48px auto 0;
     padding:0 20px;
   }
   .organized .tag{
@@ -272,31 +241,29 @@
     max-width:58ch;
   }
 
-  .org-list{
+  .org-grid{
     margin-top:20px;
-    display:flex;
-    flex-direction:column;
-    gap:1px;
-    background:var(--line);
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .org-card{
+    background:var(--bg-raised);
     border:1px solid var(--line);
     border-radius:10px;
-    overflow:hidden;
-  }
-  .org-row{
-    background:var(--bg-raised);
+    padding:16px;
     display:flex;
-    align-items:baseline;
+    align-items:flex-start;
     gap:14px;
-    padding:14px 16px;
   }
-  .org-row .idx{
+  .org-card .idx{
     font-size:12px;
-    color:var(--ink-muted);
+    color:var(--signal);
     flex-shrink:0;
-    width:22px;
+    padding-top:2px;
   }
-  .org-row .name{font-size:14px;font-weight:600;}
-  .org-row .desc{font-size:13px;color:var(--ink-muted);}
+  .org-card .name{font-size:14.5px;font-weight:600;}
+  .org-card .desc{margin-top:3px;font-size:13px;line-height:1.5;color:var(--ink-muted);}
 
   /* ---------- Footer ---------- */
   footer{
@@ -310,7 +277,7 @@
 
   @media (min-width:720px){
     .hero h1{font-size:32px;}
-    .stats{grid-template-columns:repeat(3,1fr);}
+    .org-grid{grid-template-columns:1fr 1fr;}
   }
 </style>
 </head>
@@ -349,7 +316,7 @@
     <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
       <span></span><span></span><span></span>
     </button>
-    <div class="brand mono"><span class="prompt">~/</span>adamwelt<span class="cursor"></span></div>
+    <div class="brand mono"><span class="prompt">~</span><span class="cursor"></span></div>
   </header>
 
   <main>
@@ -359,41 +326,35 @@
           <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
         </div>
         <div class="term-body">
-          <div class="line">$ whoami<br><span class="ok">reference for security techniques</span></div>
+          <div class="line">$ cat about.txt<br><span class="ok">a reference for security techniques</span></div>
           <div class="line" style="margin-top:8px;">$ ls <span class="path">./techniques</span><br>network/  web/  social-engineering/  system/</div>
           <div class="line" style="margin-top:8px;">$ <span class="final-cursor"></span></div>
         </div>
       </div>
 
       <h1>Cybersecurity techniques, explained <span class="signal-word">plainly</span>.</h1>
-      <p>A static reference covering how common attack and defense techniques actually work — no accounts, no feeds, just the material. Open the menu to browse by category.</p>
-    </section>
-
-    <section class="stats">
-      <div class="stat"><div class="num mono">4</div><div class="label">Categories</div></div>
-      <div class="stat"><div class="num mono">10</div><div class="label">Techniques</div></div>
-      <div class="stat"><div class="num mono">100%</div><div class="label">Static / offline</div></div>
+      <p>A reference covering how common attack and defense techniques actually work — no accounts, no feeds, just the material. Open the menu to browse by category.</p>
     </section>
 
     <section class="organized">
       <div class="tag mono">[ structure ]</div>
       <h2>How this reference is organized</h2>
-      <p>Every technique lives under one of four categories, reachable from the menu in the top-left. Each category page lists its techniques; each technique page covers what it is, how it works, and how it's typically detected or defended against.</p>
+      <p>Techniques are grouped into four categories, reachable from the menu in the top-left. Each category page lists its techniques; each technique page covers what it is, how it works, and how it's typically detected or defended against.</p>
 
-      <div class="org-list">
-        <div class="org-row">
+      <div class="org-grid">
+        <div class="org-card">
           <div class="idx mono">01</div>
           <div><div class="name">Network</div><div class="desc">Attacks against traffic and infrastructure</div></div>
         </div>
-        <div class="org-row">
+        <div class="org-card">
           <div class="idx mono">02</div>
           <div><div class="name">Web</div><div class="desc">Attacks against applications and sessions</div></div>
         </div>
-        <div class="org-row">
+        <div class="org-card">
           <div class="idx mono">03</div>
           <div><div class="name">Social Engineering</div><div class="desc">Attacks against people, not systems</div></div>
         </div>
-        <div class="org-row">
+        <div class="org-card">
           <div class="idx mono">04</div>
           <div><div class="name">System</div><div class="desc">Attacks after initial access is gained</div></div>
         </div>
@@ -401,7 +362,7 @@
     </section>
   </main>
 
-  <footer class="mono">Adamwelt — static reference, no tracking, no accounts.</footer>
+  <footer class="mono">No tracking. No accounts.</footer>
 
   <script>
     const menuBtn = document.getElementById('menuBtn');

@@ -192,7 +192,7 @@
     color:var(--ink-muted);
   }
   .term-body .line{white-space:pre-wrap;}
-  .term-body .ok{color:#7ee787;}
+  .term-body .ok{color:var(--signal);}
   .term-body .path{color:var(--signal);}
   .term-body .final-cursor{
     display:inline-block;width:7px;height:13px;background:var(--signal);
@@ -290,24 +290,16 @@
     <nav>
       <div class="drawer-group">
         <div class="drawer-group-label mono">Network</div>
-        <a class="drawer-link" href="#">Wi-Fi Hacking</a>
+        <a class="drawer-link" href="wpa2-handshake-capture.html">WPA2 Handshake Capture</a>
+        <a class="drawer-link" href="#">Deauth Flooder</a>
         <a class="drawer-link" href="#">Man-in-the-Middle</a>
-        <a class="drawer-link" href="#">Packet Sniffing</a>
+        <a class="drawer-link" href="#">Honeypot</a>
+        <a class="drawer-link" href="#">Evil Twin</a>
       </div>
       <div class="drawer-group">
-        <div class="drawer-group-label mono">Web</div>
-        <a class="drawer-link" href="#">SQL Injection</a>
-        <a class="drawer-link" href="#">Cross-Site Scripting</a>
-      </div>
-      <div class="drawer-group">
-        <div class="drawer-group-label mono">Social Engineering</div>
-        <a class="drawer-link" href="#">Phishing</a>
-        <a class="drawer-link" href="#">Pretexting</a>
-      </div>
-      <div class="drawer-group">
-        <div class="drawer-group-label mono">System</div>
-        <a class="drawer-link" href="#">Privilege Escalation</a>
-        <a class="drawer-link" href="#">Malware Analysis</a>
+        <div class="drawer-group-label mono">Physical</div>
+        <a class="drawer-link" href="#">NFC Emulate</a>
+        <a class="drawer-link" href="#">Infrared</a>
       </div>
     </nav>
   </aside>
@@ -327,7 +319,7 @@
         </div>
         <div class="term-body">
           <div class="line">$ cat about.txt<br><span class="ok">a reference for security techniques</span></div>
-          <div class="line" style="margin-top:8px;">$ ls <span class="path">./techniques</span><br>network/  web/  social-engineering/  system/</div>
+          <div class="line" style="margin-top:8px;">$ ls <span class="path">./techniques</span><br>network/  physical/</div>
           <div class="line" style="margin-top:8px;">$ <span class="final-cursor"></span></div>
         </div>
       </div>
@@ -339,7 +331,7 @@
     <section class="organized">
       <div class="tag mono">[ structure ]</div>
       <h2>How this reference is organized</h2>
-      <p>Techniques are grouped into four categories, reachable from the menu in the top-left. Each category page lists its techniques; each technique page covers what it is, how it works, and how it's typically detected or defended against.</p>
+      <p>Techniques are grouped into two categories, reachable from the menu in the top-left. Each category page lists its techniques; each technique page covers what it is, how it works, and how it's typically detected or defended against.</p>
 
       <div class="org-grid">
         <div class="org-card">
@@ -348,15 +340,7 @@
         </div>
         <div class="org-card">
           <div class="idx mono">02</div>
-          <div><div class="name">Web</div><div class="desc">Attacks against applications and sessions</div></div>
-        </div>
-        <div class="org-card">
-          <div class="idx mono">03</div>
-          <div><div class="name">Social Engineering</div><div class="desc">Attacks against people, not systems</div></div>
-        </div>
-        <div class="org-card">
-          <div class="idx mono">04</div>
-          <div><div class="name">System</div><div class="desc">Attacks after initial access is gained</div></div>
+          <div><div class="name">Physical</div><div class="desc">Attacks requiring physical proximity or access</div></div>
         </div>
       </div>
     </section>

